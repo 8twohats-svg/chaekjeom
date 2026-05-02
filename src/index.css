@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #FAF7F0;
+  --color-paper-dark: #F5EFDF;
+  --color-ink: #2A2520;
+  --color-ink-soft: #6B5E4E;
+  --color-accent: #8B6F47;
+  --color-accent-soft: #D4B896;
+}
+
+html, body {
+  font-family: "Pretendard", "Nanum Myeongjo", system-ui, -apple-system, sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Nanum Myeongjo";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/nanummyeongjo/v22/9Btx6929GnAks0i7C8GZGcuzjwlR.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Nanum Myeongjo";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/nanummyeongjo/v22/9Btx6921GnAks0i7C8GZKnvweFOq.woff2") format("woff2");
+}
+
+.font-serif {
+  font-family: "Nanum Myeongjo", serif;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
