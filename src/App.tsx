@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sentences } from "./data/sentences";
+import { track } from "./lib/analytics";
 
 type Stage = "home" | "result";
 
@@ -12,7 +13,12 @@ const ANSWER_PREFIXES = [
   "책님께서 말씀하시길",
   "책님이 정답을 알려드립니다",
   "책님이 한 말씀 하시길",
-  "책님의 답은",
+  "책님의 답은 이거예요",
+  "책님이 점지하시길",
+  "책님이 그러시는데요",
+  "책님 의견은",
+  "책님 왈,",
+  "책님이 보시기에",
 ];
 
 function pickPrefix(): string {
@@ -25,34 +31,47 @@ function App() {
   const [prefix, setPrefix] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    track.pageView();
+  }, []);
+
   const ask = () => {
-    setAnswer(pickRandom());
+    track.askClicked();
+    const a = pickRandom();
+    setAnswer(a);
     setPrefix(pickPrefix());
     setStage("result");
     setCopied(false);
+    track.resultView(a);
   };
 
   const askAgain = () => {
-    setAnswer(pickRandom());
+    track.askAgainClicked();
+    const a = pickRandom();
+    setAnswer(a);
     setPrefix(pickPrefix());
     setCopied(false);
+    track.resultView(a);
   };
 
   const reset = () => {
+    track.resetClicked();
     setStage("home");
   };
 
   const share = async () => {
-    const text = `📖 책점\n\n${prefix},\n\n"${answer}"\n\n나의 답을 받아보세요 → https://chaekjeom.pages.dev`;
+    track.shareClicked();
+    const text = `📖✨ 책점\n\n${prefix}\n"${answer}"\n— 책님\n\n나도 책점 보러가기 → https://chaekjeom.pages.dev`;
     try {
       await navigator.clipboard.writeText(text);
+      track.shareCopied();
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {}
   };
 
   return (
-    <div className="min-h-screen bg-paper flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full">
           {stage === "home" ? (
@@ -70,9 +89,8 @@ function App() {
         </div>
       </main>
 
-      <footer className="text-center text-xs text-ink-soft/60 py-6 px-4 space-y-2">
-        <p className="font-serif">책점</p>
-        <p>© 2026</p>
+      <footer className="text-center text-xs text-ink-soft/70 py-6 px-4">
+        <p>📖 책점 © 2026</p>
       </footer>
     </div>
   );
@@ -80,34 +98,37 @@ function App() {
 
 function Home({ onAsk }: { onAsk: () => void }) {
   return (
-    <div className="text-center space-y-12 animate-fade-in">
-      <div className="space-y-4">
-        <div className="text-6xl mb-4" aria-hidden>
+    <div className="text-center space-y-10 animate-fade-in">
+      <div className="space-y-5">
+        <div className="text-8xl animate-bounce-soft" aria-hidden>
           📖
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-ink font-serif tracking-tight">
+        <h1 className="text-5xl sm:text-6xl font-black text-ink tracking-tight">
           책점
         </h1>
-        <p className="text-ink-soft leading-relaxed font-serif">
-          마음에 질문을 담고
+        <p className="text-ink-soft leading-relaxed text-base">
+          ✨ 마음에 질문을 담고 ✨
           <br />
-          책을 펼쳐보세요.
+          책님께 한 말씀 받아보세요
         </p>
       </div>
 
       <button
         type="button"
         onClick={onAsk}
-        className="w-full py-5 px-8 bg-ink text-paper rounded-full font-medium hover:bg-accent transition-colors text-lg shadow-lg shadow-ink/10"
+        className="w-full py-5 px-8 bg-purple-deep text-white rounded-3xl font-bold text-lg
+                   hover:scale-105 active:scale-95 transition-transform
+                   shadow-2xl shadow-purple/40
+                   border-2 border-purple-deep"
       >
-        책님께 묻기
+        책님께 묻기 ✨
       </button>
 
-      <p className="text-xs text-ink-soft/60 leading-relaxed">
-        * 운명은 책님의 한 마디 안에 숨어 있습니다.
+      <div className="bg-white/60 backdrop-blur rounded-2xl p-4 text-sm text-ink-soft border border-white/80 leading-relaxed">
+        💡 진지하게 받아들이지 마세요
         <br />
-        해석은 마음 가는 대로.
-      </p>
+        <span className="font-bold text-ink">책님</span>도 가끔은 농담을 하신답니다
+      </div>
     </div>
   );
 }
@@ -128,22 +149,23 @@ function Result({
   copied: boolean;
 }) {
   return (
-    <div className="space-y-10 animate-fade-in" key={answer}>
+    <div className="space-y-8" key={answer}>
       {/* 책 펼친 카드 */}
-      <div className="bg-paper-dark rounded-3xl px-8 py-12 sm:py-16 border border-accent-soft/30 shadow-xl shadow-ink/5 relative overflow-hidden">
-        {/* 책 가운데 라인 */}
-        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-accent-soft/20" />
-
-        <div className="relative space-y-8 text-center">
-          <p className="text-sm text-accent font-serif tracking-wide">
-            ── {prefix} ──
+      <div className="bg-white rounded-3xl px-7 py-12 shadow-2xl shadow-purple/20 border-2 border-purple/20 animate-pop">
+        <div className="space-y-7 text-center">
+          <p className="text-sm text-purple-deep font-bold tracking-wide">
+            ✨ {prefix} ✨
           </p>
 
-          <p className="text-2xl sm:text-3xl text-ink leading-relaxed font-serif font-bold px-2">
+          <p className="text-2xl sm:text-3xl text-ink leading-relaxed font-extrabold px-2">
             "{answer}"
           </p>
 
-          <p className="text-xs text-ink-soft/70 font-serif">— 책님</p>
+          <div className="flex items-center justify-center gap-2 text-sm text-ink-soft pt-2">
+            <span>—</span>
+            <span className="font-bold">책님</span>
+            <span>📖</span>
+          </div>
         </div>
       </div>
 
@@ -151,16 +173,20 @@ function Result({
         <button
           type="button"
           onClick={onShare}
-          className="w-full py-4 bg-ink text-paper rounded-full font-medium hover:bg-accent transition-colors"
+          className={`w-full py-4 rounded-3xl font-bold text-lg shadow-xl transition-transform hover:scale-105 active:scale-95 ${
+            copied
+              ? "bg-yellow text-ink shadow-yellow/40"
+              : "bg-pink text-white shadow-pink/40"
+          }`}
         >
-          {copied ? "✓ 복사됐어요" : "공유하기"}
+          {copied ? "✓ 복사됐어요" : "📋 공유하기"}
         </button>
         <button
           type="button"
           onClick={onAskAgain}
-          className="w-full py-4 bg-paper-dark text-ink rounded-full font-medium hover:bg-accent-soft/30 transition-colors border border-accent-soft/30"
+          className="w-full py-4 bg-purple text-white rounded-3xl font-bold text-lg shadow-xl shadow-purple/40 hover:scale-105 active:scale-95 transition-transform"
         >
-          한 번 더 묻기
+          🎲 한 번 더 묻기
         </button>
         <button
           type="button"
@@ -171,10 +197,10 @@ function Result({
         </button>
       </div>
 
-      <p className="text-xs text-ink-soft/60 text-center leading-relaxed">
-        해석은 본인의 몫입니다.
+      <p className="text-xs text-ink-soft/70 text-center leading-relaxed bg-white/40 backdrop-blur rounded-2xl py-3 px-4">
+        🤷 해석은 본인의 몫
         <br />
-        책님은 책임지지 않습니다.
+        🙅 책님은 책임지지 않습니다
       </p>
     </div>
   );
