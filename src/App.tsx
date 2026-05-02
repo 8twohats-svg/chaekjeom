@@ -89,7 +89,16 @@ function App() {
         </div>
       </main>
 
-      <footer className="text-center text-xs text-ink-soft/70 py-6 px-4">
+      <footer className="text-center text-xs text-ink-soft/70 py-6 px-4 space-y-2">
+        <div className="space-x-3">
+          <a href="/privacy/" className="hover:text-ink transition-colors">
+            개인정보처리방침
+          </a>
+          <span>·</span>
+          <a href="/terms/" className="hover:text-ink transition-colors">
+            이용약관
+          </a>
+        </div>
         <p>📖 책점 © 2026</p>
       </footer>
     </div>
